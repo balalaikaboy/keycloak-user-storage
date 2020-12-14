@@ -1,0 +1,76 @@
+var ccompany = db.DBCompany.find({ name: companyName }, { _id: 1 });
+if (!ccompany.hasNext()) {
+  print(
+    "ERROR: Company " +
+      companyName +
+      " not found, please verify the configuration"
+  );
+  quit(1);
+}
+var company = ccompany.next();
+var result = db.ExportTask.update(
+  {
+    companyId: company._id,
+  },
+  {
+    "companyId": company._id,
+    "schedule" : {
+		    "cron" : "5 0 * * *"
+	  },
+    "data": {
+        "grouping": "ROOM",
+        "includes": [
+            "CHAT",
+            "GROUP_CHAT",
+            "FILE",
+            "IMAGE",
+            "VIDEO"
+        ]
+    },
+    "kind": "HTTP",
+    "http": {
+        "server": {
+            "host": "cnl20106908.cn.hsbc",
+            "port": 8443,
+            "verb": "POST",
+            "contentType": "application/json",
+            "timeoutSecond": 30,
+            "proxy": {
+                "enabled": false
+            },
+            "ssl": {
+                "enabled": false
+            },
+            "path": "/IMLA/chatDatas"
+        }
+    },
+    "httpBody": {
+        "maximumSizeMb": 1,
+        "maximumAudit": 1000,
+        "headers": {
+            "Accept": "application/json"
+        },
+        "contentType": "application/json",
+        "body": "{\"roomid\": \"{{roomId}}\", \"membersidtype\": 2, \"membersid\": \"{{#participants}}{{value.email}}{{^value.email}}{{value.mobilePhoneNumber}}{{/value.email}}{{^last}}, {{/last}}{{/participants}}\", \"members\": \"{{#participants}}{{{value.displayName}}}{{^last}}, {{/last}}{{/participants}}\", \"roomname\": \"{{{roomName}}}\", \"roomnotes\": \"\", \"fromtimestamp\": \"{{firstEventTime.asGMT8}}\", \"totimestamp\": \"{{lastEventTime.asGMT8}}\", \"channel\": \"{{#channels}}{{#whatsapp}}whatsapp{{/whatsapp}}{{#wechatnative}}wechat-native{{/wechatnative}}{{#wechatminiapp}}wechat-miniapp{{/wechatminiapp}}{{#line}}line{{/line}}{{#telegram}}telegram{{/telegram}}{{#leap}}leap{{/leap}}{{^identified}}wechat-miniapp{{/identified}}{{/channels}}{{^channels}}leap{{/channels}}\", \"batchNo\": \"{{#segment}}{{{.}}}{{/segment}}{{^segment}}1{{/segment}}\", \"totalbatch\": \"{{#totalSegments}}{{{.}}}{{/totalSegments}}{{^totalSegments}}1{{/totalSegments}}\", \"contents\": [{{#events}} {\"from\": \"{{#owner}}{{email}}{{/owner}}\", \"msgtime\": \"{{eventTime.asGMT8}}\", \"type\": \"{{#attachment}}file{{/attachment}}{{^attachment}}text{{/attachment}}\", \"filename\": \"{{#attachment}}{{{displayName}}}{{/attachment}}\", \"content\": \"{{#attachment}}{{{content.base64}}}{{/attachment}}{{^attachment}}{{{content.jsonEscaped}}}{{/attachment}}\"} {{^last}}, {{/last}} {{/events}}]}",
+        "attachments": {
+            "includes": [
+                "DOCUMENT",
+                "IMAGE",
+                "AUDIO",
+                "VIDEO",
+                "BINARY"
+            ],
+            "maximumSizeMb": 5
+        },
+        "returnEventAboveLimit": true,
+        "finalSegmentIndicator": ""
+    }
+  },
+  { upsert: true }
+);
+if (result.modifiedCount == 1) {
+  print("INFO: ... Sword Gate Integration enabled successfully");
+} else {
+  print("Result unexpected, please verify the configuration");
+  printjson(result);
+}

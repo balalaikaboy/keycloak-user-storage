@@ -1,3 +1,4 @@
+var companyName = "hsbc";
 var ccompany = db.DBCompany.find({ name: companyName }, { _id: 1 });
 if (!ccompany.hasNext()) {
   print(

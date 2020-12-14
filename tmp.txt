@@ -16,7 +16,7 @@ var result = db.ExportTask.update(
   {
     "companyId": company._id,
     "schedule" : {
-		    "cron" : "5 0 * * *"
+		    "cron" : "5 16 * * *"
 	  },
     "data": {
         "grouping": "ROOM",

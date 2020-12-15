@@ -1,4 +1,26 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Sword Gate Integration Script
+//
+// Purpose:
+// This script allows to enable Sword Gate Integration for a given company.
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// CONFIGURATION
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Name of the target company (must already exist)
 var companyName = "hsbc";
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// SCRIPT - DO NOT CHANGE
+///////////////////////////////////////////////////////////////////////////////////////////////////
+print(
+  "INFO: ============================================================================"
+);
+print("INFO: LeapXpert FMOP - Sword Gate Integration Script");
+print(
+  "INFO: ============================================================================"
+);
 var ccompany = db.DBCompany.find({ name: companyName }, { _id: 1 });
 if (!ccompany.hasNext()) {
   print(
@@ -16,8 +38,9 @@ var result = db.ExportTask.update(
   {
     "companyId": company._id,
     "schedule" : {
-		    "cron" : "5 16 * * *"
-	  },
+        "cron" : "5 * * * *",
+	"delayMinutes": 5
+    },
     "data": {
         "grouping": "ROOM",
         "includes": [
@@ -52,7 +75,7 @@ var result = db.ExportTask.update(
             "Accept": "application/json"
         },
         "contentType": "application/json",
-        "body": "{\"roomid\": \"{{roomId}}\", \"membersidtype\": 2, \"membersid\": \"{{#participants}}{{value.email}}{{^value.email}}{{value.mobilePhoneNumber}}{{/value.email}}{{^last}}, {{/last}}{{/participants}}\", \"members\": \"{{#participants}}{{{value.displayName}}}{{^last}}, {{/last}}{{/participants}}\", \"roomname\": \"{{{roomName}}}\", \"roomnotes\": \"\", \"fromtimestamp\": \"{{firstEventTime.asGMT8}}\", \"totimestamp\": \"{{lastEventTime.asGMT8}}\", \"channel\": \"{{#channels}}{{#whatsapp}}whatsapp{{/whatsapp}}{{#wechatnative}}wechat-native{{/wechatnative}}{{#wechatminiapp}}wechat-miniapp{{/wechatminiapp}}{{#line}}line{{/line}}{{#telegram}}telegram{{/telegram}}{{#leap}}leap{{/leap}}{{^identified}}wechat-miniapp{{/identified}}{{/channels}}{{^channels}}leap{{/channels}}\", \"batchNo\": \"{{#segment}}{{{.}}}{{/segment}}{{^segment}}1{{/segment}}\", \"totalbatch\": \"{{#totalSegments}}{{{.}}}{{/totalSegments}}{{^totalSegments}}1{{/totalSegments}}\", \"contents\": [{{#events}} {\"from\": \"{{#owner}}{{email}}{{/owner}}\", \"msgtime\": \"{{eventTime.asGMT8}}\", \"type\": \"{{#attachment}}file{{/attachment}}{{^attachment}}text{{/attachment}}\", \"filename\": \"{{#attachment}}{{{displayName}}}{{/attachment}}\", \"content\": \"{{#attachment}}{{{content.base64}}}{{/attachment}}{{^attachment}}{{{content.jsonEscaped}}}{{/attachment}}\"} {{^last}}, {{/last}} {{/events}}]}",
+        "body": "{\"roomid\": \"{{roomId}}\", \"membersidtype\": 2, \"membersid\": \"{{#participants}}{{value.email}}{{^value.email}}{{value.mobilePhoneNumber}}{{/value.email}}{{^last}}, {{/last}}{{/participants}}\", \"members\": \"{{#participants}}{{{value.displayName}}}{{^last}}, {{/last}}{{/participants}}\", \"roomname\": \"{{{roomName}}}\", \"roomnotes\": \"\", \"fromtimestamp\": \"{{firstEventTime.asGMT8}}\", \"totimestamp\": \"{{lastEventTime.asGMT8}}\", \"channel\": \"wechat-miniapp\", \"batchNo\": \"{{#segment}}{{{.}}}{{/segment}}{{^segment}}1{{/segment}}\", \"totalbatch\": \"{{#totalSegments}}{{{.}}}{{/totalSegments}}{{^totalSegments}}1{{/totalSegments}}\", \"contents\": [{{#events}} {\"from\": \"{{#owner}}{{email}}{{/owner}}\", \"msgtime\": \"{{eventTime.asGMT8}}\", \"type\": \"{{#attachment}}file{{/attachment}}{{^attachment}}text{{/attachment}}\", \"filename\": \"{{#attachment}}{{{displayName}}}{{/attachment}}\", \"content\": \"{{#attachment}}{{{content.base64}}}{{/attachment}}{{^attachment}}{{{content.jsonEscaped}}}{{/attachment}}\"} {{^last}}, {{/last}} {{/events}}]}",
         "attachments": {
             "includes": [
                 "DOCUMENT",
